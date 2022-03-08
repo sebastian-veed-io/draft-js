@@ -20,7 +20,7 @@
   "repository": "facebook/draft-js",
   "license": "MIT",
   "scripts": {
-    "preinstall": "echo 'VEED' && npx npm-force-resolutions",
+    "preinstall": "npx npm-force-resolutions",
     "prepublish": "npm run build",
     "pretest": "node node_modules/fbjs-scripts/node/check-dev-engines.js package.json",
     "build": "gulp",
