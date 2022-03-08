@@ -17,7 +17,6 @@ import type {EntityMap} from 'EntityMap';
 
 const BlockMapBuilder = require('BlockMapBuilder');
 const CharacterMetadata = require('CharacterMetadata');
-const ContentState = require('ContentState');
 const DataTransfer = require('DataTransfer');
 const DraftModifier = require('DraftModifier');
 const DraftPasteProcessor = require('DraftPasteProcessor');
@@ -68,8 +67,9 @@ function editOnPaste(editor: DraftEditor, e: SyntheticClipboardEvent<>): void {
             editorState.getSelection(),
           ),
         });
-        const currentBlockType =
-          RichTextEditorUtil.getCurrentBlockType(editorState);
+        const currentBlockType = RichTextEditorUtil.getCurrentBlockType(
+          editorState,
+        );
 
         const text = DraftPasteProcessor.processText(
           blocks,
@@ -99,17 +99,23 @@ function editOnPaste(editor: DraftEditor, e: SyntheticClipboardEvent<>): void {
   const editorState = editor._latestEditorState;
 
   if (editor.props.formatPastedText) {
-    const {text: formattedText, html: formattedHtml} =
-      editor.props.formatPastedText(text, html);
+    const {
+      text: formattedText,
+      html: formattedHtml,
+    } = editor.props.formatPastedText(text, html);
     text = formattedText;
     html = ((formattedHtml: any): string);
+  }
+  if (
+    editor.props.handlePastedText &&
+    isEventHandled(editor.props.handlePastedText(text, html, editorState))
+  ) {
+    return;
   }
 
   if (text) {
     textBlocks = splitTextIntoTextBlocks(text);
   }
-
-  let handleInternalPaste: ?() => void = null;
 
   if (!editor.props.stripPastedStyles) {
     // If the text from the paste event is rich content that matches what we
@@ -136,10 +142,10 @@ function editOnPaste(editor: DraftEditor, e: SyntheticClipboardEvent<>): void {
           internalClipboard.size === 1 &&
           internalClipboard.first().getText() === text)
       ) {
-        handleInternalPaste = () =>
-          editor.update(
-            insertFragment(editor._latestEditorState, internalClipboard),
-          );
+        editor.update(
+          insertFragment(editor._latestEditorState, internalClipboard),
+        );
+        return;
       }
     } else if (
       internalClipboard &&
@@ -150,28 +156,9 @@ function editOnPaste(editor: DraftEditor, e: SyntheticClipboardEvent<>): void {
       // Safari does not properly store text/html in some cases.
       // Use the internalClipboard if present and equal to what is on
       // the clipboard. See https://bugs.webkit.org/show_bug.cgi?id=19893.
-      handleInternalPaste = () =>
-        editor.update(
-          insertFragment(editor._latestEditorState, internalClipboard),
-        );
-    }
-
-    if (
-      editor.props.handlePastedText &&
-      isEventHandled(
-        editor.props.handlePastedText(
-          text,
-          html,
-          editorState,
-          handleInternalPaste != null,
-        ),
-      )
-    ) {
-      return;
-    }
-
-    if (handleInternalPaste != null) {
-      handleInternalPaste();
+      editor.update(
+        insertFragment(editor._latestEditorState, internalClipboard),
+      );
       return;
     }
 
@@ -207,8 +194,9 @@ function editOnPaste(editor: DraftEditor, e: SyntheticClipboardEvent<>): void {
       ),
     });
 
-    const currentBlockType =
-      RichTextEditorUtil.getCurrentBlockType(editorState);
+    const currentBlockType = RichTextEditorUtil.getCurrentBlockType(
+      editorState,
+    );
 
     const textFragment = DraftPasteProcessor.processText(
       textBlocks,
@@ -231,14 +219,13 @@ function insertFragment(
     editorState.getSelection(),
     fragment,
   );
-
-  const newEntityMap = entityMap
-    ? ContentState.mergeEntityMaps(newContent.getAllEntities(), entityMap)
-    : newContent.getAllEntities();
+  // TODO: merge the entity map once we stop using DraftEntity
+  // like this:
+  // const mergedEntityMap = newContent.getEntityMap().merge(entityMap);
 
   return EditorState.push(
     editorState,
-    newContent.setEntityMap(newEntityMap),
+    newContent.set('entityMap', entityMap),
     'insert-fragment',
   );
 }

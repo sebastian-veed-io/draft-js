@@ -14,14 +14,12 @@
 import type {DraftTextAlignment} from 'DraftTextAlignment';
 import type EditorState from 'EditorState';
 
+const React = require('React');
+
 const cx = require('cx');
-const React = require('react');
-const shallowEqual = require('shallowEqual');
 
 type Props = {
-  ariaHidden?: boolean,
   accessibilityID: string,
-  className?: string,
   editorState: EditorState,
   text: string,
   textAlignment: DraftTextAlignment,
@@ -36,38 +34,31 @@ type Props = {
  */
 class DraftEditorPlaceholder extends React.Component<Props> {
   shouldComponentUpdate(nextProps: Props): boolean {
-    const {editorState, ...otherProps} = this.props;
-    const {editorState: nextEditorState, ...nextOtherProps} = nextProps;
     return (
-      editorState.getSelection().getHasFocus() !==
-        nextEditorState.getSelection().getHasFocus() ||
-      !shallowEqual(otherProps, nextOtherProps)
+      this.props.text !== nextProps.text ||
+      this.props.editorState.getSelection().getHasFocus() !==
+        nextProps.editorState.getSelection().getHasFocus()
     );
   }
 
   render(): React.Node {
-    const innerClassName =
-      // We can't use joinClasses since the fbjs flow definition is wrong. Using
-      // cx to concatenate is rising issues with haste internally.
-      // eslint-disable-next-line fb-www/cx-concat
-      cx('public/DraftEditorPlaceholder/inner') +
-      (this.props.className != null ? ` ${this.props.className}` : '');
+    const hasFocus = this.props.editorState.getSelection().getHasFocus();
+
+    const className = cx({
+      'public/DraftEditorPlaceholder/root': true,
+      'public/DraftEditorPlaceholder/hasFocus': hasFocus,
+    });
+
+    const contentStyle = {
+      whiteSpace: 'pre-wrap',
+    };
 
     return (
-      <div
-        aria-hidden={this.props.ariaHidden}
-        className={cx({
-          'public/DraftEditorPlaceholder/root': true,
-          'public/DraftEditorPlaceholder/hasFocus': this.props.editorState
-            .getSelection()
-            .getHasFocus(),
-        })}>
+      <div className={className}>
         <div
-          className={innerClassName}
+          className={cx('public/DraftEditorPlaceholder/inner')}
           id={this.props.accessibilityID}
-          style={{
-            whiteSpace: 'pre-wrap',
-          }}>
+          style={contentStyle}>
           {this.props.text}
         </div>
       </div>

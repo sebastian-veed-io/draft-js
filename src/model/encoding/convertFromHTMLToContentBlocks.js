@@ -19,8 +19,8 @@ import type {EntityMap} from 'EntityMap';
 const CharacterMetadata = require('CharacterMetadata');
 const ContentBlock = require('ContentBlock');
 const ContentBlockNode = require('ContentBlockNode');
-const ContentState = require('ContentState');
 const DefaultDraftBlockRenderMap = require('DefaultDraftBlockRenderMap');
+const DraftEntity = require('DraftEntity');
 const URI = require('URI');
 
 const cx = require('cx');
@@ -34,7 +34,6 @@ const isHTMLElement = require('isHTMLElement');
 const isHTMLImageElement = require('isHTMLImageElement');
 
 const experimentalTreeDataSupport = gkx('draft_tree_data_support');
-const allowPastingAltText = gkx('draftjs_paste_emojis');
 
 const NBSP = '&nbsp;';
 const SPACE = ' ';
@@ -108,7 +107,7 @@ type BlockTypeMap = Map<string, string | Array<string>>;
 const buildBlockTypeMap = (
   blockRenderMap: DraftBlockRenderMap,
 ): BlockTypeMap => {
-  const blockTypeMap: {[string]: any | Array<any | string>} = {};
+  const blockTypeMap = {};
 
   blockRenderMap.mapKeys((blockType, desc) => {
     const elements = [desc.element];
@@ -177,7 +176,10 @@ const isValidAnchor = (node: Node) => {
     // Just checking whether we can actually create a URI
     const _ = new URI(anchorNode.href);
     return true;
-  } catch {
+    // We need our catch statements to have arguments, else
+    // UglifyJS (which we use for our OSS builds) will crash.
+    // eslint-disable-next-line fb-www/no-unused-catch-bindings
+  } catch (_) {
     return false;
   }
 };
@@ -306,7 +308,7 @@ class ContentBlocksBuilder {
   contentBlocks: Array<BlockNodeRecord> = [];
 
   // Entity map use to store links and images found in the HTML nodes
-  contentState: ContentState = ContentState.createFromText('');
+  entityMap: EntityMap = DraftEntity;
 
   // Map HTML tags to draftjs block types and disambiguation function
   blockTypeMap: BlockTypeMap;
@@ -331,7 +333,7 @@ class ContentBlocksBuilder {
     this.currentDepth = 0;
     this.currentEntity = null;
     this.currentText = '';
-    this.contentState = ContentState.createFromText('');
+    this.entityMap = DraftEntity;
     this.wrapper = null;
     this.contentBlocks = [];
   }
@@ -374,7 +376,7 @@ class ContentBlocksBuilder {
     }
     return {
       contentBlocks: this.contentBlocks,
-      entityMap: this.contentState.getEntityMap(),
+      entityMap: this.entityMap,
     };
   }
 
@@ -613,7 +615,7 @@ class ContentBlocksBuilder {
       return;
     }
     const image: HTMLImageElement = (node: any);
-    const entityConfig: {[string]: string} = {};
+    const entityConfig = {};
 
     imgAttr.forEach(attr => {
       const imageAttribute = image.getAttribute(attr);
@@ -622,21 +624,24 @@ class ContentBlocksBuilder {
       }
     });
 
-    this.contentState = this.contentState.createEntity(
+    // TODO: T15530363 update this when we remove DraftEntity entirely
+    this.currentEntity = this.entityMap.__create(
       'IMAGE',
       'IMMUTABLE',
       entityConfig,
     );
-    this.currentEntity = this.contentState.getLastCreatedEntityKey();
 
     // The child text node cannot just have a space or return as content (since
-    // we strip those out)
-    const alt = image.getAttribute('alt');
-    if (allowPastingAltText && alt != null && alt.length > 0) {
-      this._appendText(alt, style);
+    // we strip those out), unless the image is for presentation only.
+    // See https://github.com/facebook/draft-js/issues/231 for some context.
+    if (gkx('draftjs_fix_paste_for_img')) {
+      if (image.getAttribute('role') !== 'presentation') {
+        this._appendText('\ud83d\udcf7', style);
+      }
     } else {
       this._appendText('\ud83d\udcf7', style);
     }
+
     this.currentEntity = null;
   }
 
@@ -656,7 +661,7 @@ class ContentBlocksBuilder {
       return;
     }
     const anchor: HTMLAnchorElement = (node: any);
-    const entityConfig: {[string]: string} = {};
+    const entityConfig = {};
 
     anchorAttr.forEach(attr => {
       const anchorAttribute = anchor.getAttribute(attr);
@@ -666,13 +671,12 @@ class ContentBlocksBuilder {
     });
 
     entityConfig.url = new URI(anchor.href).toString();
-
-    this.contentState = this.contentState.createEntity(
+    // TODO: T15530363 update this when we remove DraftEntity completely
+    this.currentEntity = this.entityMap.__create(
       'LINK',
       'MUTABLE',
       entityConfig || {},
     );
-    this.currentEntity = this.contentState.getLastCreatedEntityKey();
 
     blockConfigs.push(
       ...this._toBlockConfigs(Array.from(node.childNodes), style),
@@ -748,7 +752,9 @@ class ContentBlocksBuilder {
    * Extract the text and the associated inline styles form an
    * array of content block configs.
    */
-  _extractTextFromBlockConfigs(blockConfigs: Array<ContentBlockConfig>): {
+  _extractTextFromBlockConfigs(
+    blockConfigs: Array<ContentBlockConfig>,
+  ): {
     text: string,
     characterList: List<CharacterMetadata>,
     ...

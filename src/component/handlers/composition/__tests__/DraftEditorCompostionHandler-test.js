@@ -68,7 +68,7 @@ function getEditorStateFromHTML(html: string) {
           blocksFromHTML.contentBlocks || [],
           blocksFromHTML.entityMap,
         )
-      : ContentState.createFromText('');
+      : ContentState.createEmpty();
   return EditorState.createWithContent(state);
 }
 
@@ -119,7 +119,6 @@ test('Can handle a single mutation', () => {
   withGlobalGetSelectionAs({}, () => {
     editor._latestEditorState = getEditorState({blockkey0: ''});
     const mutations = Map({'blockkey0-0-0': '\u79c1'});
-    // $FlowFixMe[method-unbinding] added when improving typing for this parameters
     require('DOMObserver').prototype.stopAndFlushMutations.mockReturnValue(
       mutations,
     );
@@ -145,7 +144,6 @@ test('Can handle mutations in multiple blocks', () => {
       'blockkey0-0-0': 'reactjs',
       'blockkey1-0-0': 'draftjs',
     });
-    // $FlowFixMe[method-unbinding] added when improving typing for this parameters
     require('DOMObserver').prototype.stopAndFlushMutations.mockReturnValue(
       mutations,
     );
@@ -176,7 +174,6 @@ test('Can handle mutations in the same block in multiple leaf nodes', () => {
       [`${blockKey}-0-1`]: 'draftbb',
       [`${blockKey}-0-2`]: ' graphqlccc',
     });
-    // $FlowFixMe[method-unbinding] added when improving typing for this parameters
     require('DOMObserver').prototype.stopAndFlushMutations.mockReturnValue(
       mutations,
     );

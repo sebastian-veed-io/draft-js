@@ -100,18 +100,11 @@ const DraftEditorCompositionHandler = {
    */
   onKeyDown(editor: DraftEditor, e: SyntheticKeyboardEvent<>): void {
     if (!stillComposing) {
-      // This check was added in D23734060. Seemingly, we should be checking
-      // to see if the resolved flag is false here, otherwise the below
-      // comment doesn't make sense. With this change, it should prevent
-      // over-firing the resolveComposition() method, which might help fix
-      // some existing IME issues.
-      if (!resolved) {
-        // If a keydown event is received after compositionend but before the
-        // 20ms timer expires (ex: type option-E then backspace, or type A then
-        // backspace in 2-Set Korean), we should immediately resolve the
-        // composition and reinterpret the key press in edit mode.
-        DraftEditorCompositionHandler.resolveComposition(editor);
-      }
+      // If a keydown event is received after compositionend but before the
+      // 20ms timer expires (ex: type option-E then backspace, or type A then
+      // backspace in 2-Set Korean), we should immediately resolve the
+      // composition and reinterpret the key press in edit mode.
+      DraftEditorCompositionHandler.resolveComposition(editor);
       editor._onKeyDown(e);
       return;
     }
@@ -152,12 +145,11 @@ const DraftEditorCompositionHandler = {
       return;
     }
 
-    const lastEditorState = editor._latestEditorState;
     const mutations = nullthrows(domObserver).stopAndFlushMutations();
     domObserver = null;
     resolved = true;
 
-    let editorState = EditorState.set(lastEditorState, {
+    let editorState = EditorState.set(editor._latestEditorState, {
       inCompositionMode: false,
     });
 
@@ -187,8 +179,9 @@ const DraftEditorCompositionHandler = {
 
     let contentState = editorState.getCurrentContent();
     mutations.forEach((composedChars, offsetKey) => {
-      const {blockKey, decoratorKey, leafKey} =
-        DraftOffsetKey.decode(offsetKey);
+      const {blockKey, decoratorKey, leafKey} = DraftOffsetKey.decode(
+        offsetKey,
+      );
 
       const {start, end} = editorState
         .getBlockTree(blockKey)
@@ -226,14 +219,9 @@ const DraftEditorCompositionHandler = {
 
     // When we apply the text changes to the ContentState, the selection always
     // goes to the end of the field, but it should just stay where it is
-    // after compositionEnd. We also apply this to the last editor state, rather
-    // than the new editor state in order to avoid problems that might come from
-    // race conditions around calculating ranges from mutations when processing
-    // the mutations above. If the ranges are off, for example, using mentions
-    // in IME mode, then the selection will move the cursor to an invalid range.
-    // See D23905960 for more context:
+    // after compositionEnd.
     const documentSelection = getDraftEditorSelection(
-      lastEditorState,
+      editorState,
       getContentEditableContainer(editor),
     );
     const compositionEndSelectionState = documentSelection.selectionState;

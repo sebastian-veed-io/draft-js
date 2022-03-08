@@ -16,7 +16,7 @@ import type {BlockNodeRecord} from 'BlockNodeRecord';
 import type ContentState from 'ContentState';
 import type {HTMLDir} from 'UnicodeBidiDirection';
 
-const React = require('react');
+const React = require('React');
 
 export type DraftDecoratorStrategy = (
   block: BlockNodeRecord,
@@ -53,7 +53,7 @@ export type DraftDecorator = {
  */
 export type DraftDecoratorComponentProps = {
   blockKey: BlockNodeKey,
-  children?: Array<React.MixedElement>,
+  children?: Array<React.Node>,
   contentState: ContentState,
   decoratedText: string,
   dir: ?HTMLDir,
@@ -68,4 +68,5 @@ export type DraftDecoratorComponentProps = {
   entityKey: ?string,
   offsetKey: string,
   start: number,
+  ...
 };

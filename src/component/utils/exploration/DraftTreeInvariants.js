@@ -154,12 +154,10 @@ const DraftTreeInvariants = {
    */
   isValidTree(blockMap: BlockMap): boolean {
     const blocks = blockMap.toArray();
-    if (
-      !blocks.every(block => DraftTreeInvariants.isValidBlock(block, blockMap))
-    ) {
+    if (!blocks.every(block => this.isValidBlock(block, blockMap))) {
       return false;
     }
-    return DraftTreeInvariants.isConnectedTree(blockMap);
+    return this.isConnectedTree(blockMap);
   },
 };
 

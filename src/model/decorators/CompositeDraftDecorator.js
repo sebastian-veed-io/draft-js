@@ -50,37 +50,16 @@ class CompositeDraftDecorator {
     this._decorators = decorators.slice();
   }
 
-  /**
-   * Returns true if this CompositeDraftDecorator has the same decorators as
-   * the given array. This does a reference check, so the decorators themselves
-   * have to be the same objects.
-   */
-  isCompositionOfDecorators(arr: $ReadOnlyArray<DraftDecorator>): boolean {
-    if (this._decorators.length !== arr.length) {
-      return false;
-    }
-    for (let ii = 0; ii < arr.length; ii++) {
-      if (this._decorators[ii] !== arr[ii]) {
-        return false;
-      }
-    }
-    return true;
-  }
-
-  getDecorators(): $ReadOnlyArray<DraftDecorator> {
-    return this._decorators;
-  }
-
   getDecorations(
     block: BlockNodeRecord,
     contentState: ContentState,
   ): List<?string> {
     const decorations = Array(block.getText().length).fill(null);
 
-    this._decorators.forEach((decorator: DraftDecorator, ii: number) => {
+    this._decorators.forEach((/*object*/ decorator, /*number*/ ii) => {
       let counter = 0;
       const strategy = decorator.strategy;
-      function getDecorationsChecker(start: number, end: number) {
+      const callback = (/*number*/ start, /*number*/ end) => {
         // Find out if any of our matching range is already occupied
         // by another decorator. If so, discard the match. Otherwise, store
         // the component key for rendering.
@@ -88,8 +67,8 @@ class CompositeDraftDecorator {
           occupySlice(decorations, start, end, ii + DELIMITER + counter);
           counter++;
         }
-      }
-      strategy(block, getDecorationsChecker, contentState);
+      };
+      strategy(block, callback, contentState);
     });
 
     return List(decorations);

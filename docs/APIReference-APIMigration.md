@@ -9,9 +9,7 @@ The Draft.js v0.10 release includes a change to the API for managing
 that the methods which were previously accessed on `DraftEntity` are now moved
 to the `ContentState` record.
 
-The old API was set to be permanently removed in v0.11, but will now be removed in v0.12. Make sure to migrate over!
-
-This API improvement unlocks the path for many benefits that will be available in v0.12:
+This API improvement unlocks the path for many benefits that will be available in v0.11:
 
 - DraftEntity instances and storage will be immutable.
 - DraftEntity will no longer be globally accessible.
@@ -21,7 +19,7 @@ This API improvement unlocks the path for many benefits that will be available i
 
 Here is a quick list of what has been changed and how to update your application:
 
-### Creating an Entity
+### Creating an entity
 
 **Old Syntax**
 
@@ -54,7 +52,7 @@ const entityInstance = contentState.getEntity(entityKey);
 // entityKey is a string key associated with that entity when it was created
 ```
 
-### Decorator strategy arguments change
+### Decorator Strategy arguments change
 
 **Old Syntax**
 
@@ -130,4 +128,4 @@ function findLinkEntities(contentBlock, callback, contentState) {
 
 ## More Information
 
-See the [updated examples](https://github.com/facebook/draft-js/tree/master/examples/draft-0-10-0).
+For more information see the [updated examples](https://github.com/facebook/draft-js/tree/master/examples/draft-0-10-0).

@@ -162,7 +162,7 @@ test('does not discard style override when adjusting depth', () => {
   let editor = EditorState.createEmpty();
 
   editor = RichTextEditorUtil.toggleInlineStyle(editor, 'BOLD');
-  editor = RichTextEditorUtil.onTab({preventDefault: () => {}}, editor);
+  editor = RichTextEditorUtil.onTab({preventDefault: () => {}}, editor, 1);
 
   expect(editor.getCurrentInlineStyle().toJS()).toMatchSnapshot();
 });

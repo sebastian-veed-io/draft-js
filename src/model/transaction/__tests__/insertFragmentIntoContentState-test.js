@@ -126,7 +126,8 @@ test('must apply multiblock fragments', () => {
 
 test('must be able to insert a fragment with a single ContentBlockNode', () => {
   const initialSelection = SelectionState.createEmpty('A');
-  const initialContent = contentState.setBlockMap(
+  const initialContent = contentState.set(
+    'blockMap',
     createContentBlockNodeFragment([
       {
         key: 'A',
@@ -149,7 +150,8 @@ test('must be able to insert a fragment with a single ContentBlockNode', () => {
 
 test('must be able to insert fragment of ContentBlockNodes', () => {
   const initialSelection = SelectionState.createEmpty('first');
-  const initialContent = contentState.setBlockMap(
+  const initialContent = contentState.set(
+    'blockMap',
     createContentBlockNodeFragment([
       {
         key: 'first',
@@ -196,7 +198,8 @@ test('must be able to insert fragment of ContentBlockNodes', () => {
 
 test('must be able to insert fragment of ContentBlockNodes after nested block', () => {
   const initialSelection = SelectionState.createEmpty('firstChild');
-  const initialContent = contentState.setBlockMap(
+  const initialContent = contentState.set(
+    'blockMap',
     createContentBlockNodeFragment([
       {
         key: 'root',
@@ -250,7 +253,8 @@ test('must be able to insert fragment of ContentBlockNodes after nested block', 
 
 test('must be able to insert a fragment of ContentBlockNodes while updating the target block with the first fragment block properties', () => {
   const initialSelection = SelectionState.createEmpty('first');
-  const initialContent = contentState.setBlockMap(
+  const initialContent = contentState.set(
+    'blockMap',
     createContentBlockNodeFragment([
       {
         key: 'first',
@@ -297,7 +301,8 @@ test('must be able to insert a fragment of ContentBlockNodes while updating the 
 
 test('must be able to insert a fragment of ContentBlockNodes while updating the target block with the first fragment block properties after nested block', () => {
   const initialSelection = SelectionState.createEmpty('firstChild');
-  const initialContent = contentState.setBlockMap(
+  const initialContent = contentState.set(
+    'blockMap',
     createContentBlockNodeFragment([
       {
         key: 'root',
@@ -357,7 +362,8 @@ test('must be able to insert a fragment of ContentBlockNodes while updating the 
 
 test('must throw an error when trying to apply ContentBlockNode fragments when selection is on a block that has children', () => {
   const initialSelection = SelectionState.createEmpty('A');
-  const initialContent = contentState.setBlockMap(
+  const initialContent = contentState.set(
+    'blockMap',
     createContentBlockNodeFragment([
       {
         key: 'A',

@@ -71,7 +71,7 @@ const DraftEditorDragHandler = {
   /**
    * Drag originating from input terminated.
    */
-  onDragEnd(editor: DraftEditor): void {
+  onDragEnd: function(editor: DraftEditor): void {
     editor.exitCurrentMode();
     endDrag(editor);
   },
@@ -79,7 +79,7 @@ const DraftEditorDragHandler = {
   /**
    * Handle data being dropped.
    */
-  onDrop(editor: DraftEditor, e: Object): void {
+  onDrop: function(editor: DraftEditor, e: Object): void {
     const data = new DataTransfer(e.nativeEvent.dataTransfer);
 
     const editorState: EditorState = editor._latestEditorState;

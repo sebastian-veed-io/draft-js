@@ -15,11 +15,13 @@
  * @format
  */
 
-import './DraftJsRichEditorExample.css';
+import React from 'react';
 import {Editor, RichUtils, getDefaultKeyBinding} from 'draft-js';
+
 import gkx from 'draft-js/lib/gkx';
 import NestedRichTextEditorUtil from 'draft-js/lib/NestedRichTextEditorUtil';
-import React from 'react';
+
+import './DraftJsRichEditorExample.css';
 
 const RichTextUtils = gkx('draft_tree_data_support')
   ? NestedRichTextEditorUtil
@@ -37,7 +39,7 @@ class DraftJsRichEditorExample extends React.Component {
     return false;
   };
 
-  mapKeyToEditorCommand = (e) => {
+  mapKeyToEditorCommand = e => {
     if (e.keyCode === 9 /* TAB */) {
       const newEditorState = RichTextUtils.onTab(
         e,
@@ -52,13 +54,13 @@ class DraftJsRichEditorExample extends React.Component {
     return getDefaultKeyBinding(e);
   };
 
-  toggleBlockType = (blockType) => {
+  toggleBlockType = blockType => {
     this.props.onChange(
       RichTextUtils.toggleBlockType(this.props.editorState, blockType),
     );
   };
 
-  toggleInlineStyle = (inlineStyle) => {
+  toggleInlineStyle = inlineStyle => {
     this.props.onChange(
       RichTextUtils.toggleInlineStyle(this.props.editorState, inlineStyle),
     );
@@ -72,7 +74,12 @@ class DraftJsRichEditorExample extends React.Component {
     let className = 'RichEditor-editor';
     const contentState = editorState.getCurrentContent();
     if (!contentState.hasText()) {
-      if (contentState.getBlockMap().first().getType() !== 'unstyled') {
+      if (
+        contentState
+          .getBlockMap()
+          .first()
+          .getType() !== 'unstyled'
+      ) {
         className += ' RichEditor-hidePlaceholder';
       }
     }
@@ -135,11 +142,10 @@ function StyleButton({active, style, label, onToggle}) {
   return (
     <span
       className={className}
-      onMouseDown={(e) => {
+      onMouseDown={e => {
         e.preventDefault();
         onToggle(style);
-      }}
-    >
+      }}>
       {label}
     </span>
   );
@@ -168,7 +174,7 @@ function BlockStyleControls(props) {
 
   return (
     <div className="RichEditor-controls">
-      {BLOCK_TYPES.map((type) => (
+      {BLOCK_TYPES.map(type => (
         <StyleButton
           key={type.label}
           active={type.style === blockType}
@@ -193,7 +199,7 @@ function InlineStyleControls(props) {
 
   return (
     <div className="RichEditor-controls">
-      {INLINE_STYLES.map((type) => (
+      {INLINE_STYLES.map(type => (
         <StyleButton
           key={type.label}
           active={currentStyle.has(type.style)}

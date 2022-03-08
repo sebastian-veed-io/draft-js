@@ -88,16 +88,20 @@ const contentState = new ContentState({
   entityMap: Immutable.OrderedMap(),
   selectionBefore: selectionState,
   selectionAfter: selectionState,
-}).createEntity('IMAGE', 'IMMUTABLE', null);
+}).createEntity({
+  type: 'IMAGE',
+  mutability: 'IMMUTABLE',
+  data: null,
+});
 
 let editorState = EditorState.createWithContent(contentState);
 editorState = EditorState.forceSelection(editorState, selectionState);
 
-const getSampleStateForTesting = (): {
+const getSampleStateForTesting = (): {|
   editorState: EditorState,
   contentState: ContentState,
   selectionState: SelectionState,
-} => {
+|} => {
   return {editorState, contentState, selectionState};
 };
 

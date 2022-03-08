@@ -27,6 +27,7 @@ import type {BidiDirection} from 'UnicodeBidiDirection';
 
 const DraftEditorNode = require('DraftEditorNode.react');
 const DraftOffsetKey = require('DraftOffsetKey');
+const React = require('React');
 const Scroll = require('Scroll');
 const Style = require('Style');
 
@@ -36,13 +37,12 @@ const getViewportDimensions = require('getViewportDimensions');
 const Immutable = require('immutable');
 const invariant = require('invariant');
 const isHTMLElement = require('isHTMLElement');
-const React = require('react');
 
 const SCROLL_BUFFER = 10;
 
 const {List} = Immutable;
 
-// we should harden up the below flow types to make them more strict
+// we should harden up the bellow flow types to make them more strict
 type CustomRenderConfig = Object;
 type DraftRenderConfig = Object;
 type BlockRenderFn = (block: BlockNodeRecord) => ?Object;
@@ -95,7 +95,7 @@ const shouldNotAddWrapperElement = (
 };
 
 const applyWrapperElementToSiblings = (
-  wrapperTemplate: any,
+  wrapperTemplate: *,
   Element: string,
   nodes: Array<React.Node>,
 ): Array<React.Node> => {
@@ -175,8 +175,8 @@ const getElementPropsConfig = (
   editorKey: string,
   offsetKey: string,
   blockStyleFn: BlockStyleFn,
-  customConfig: CustomRenderConfig,
-  ref: null | {current: null | Element},
+  customConfig: *,
+  ref: null | {|current: null | Element|},
 ): Object => {
   let elementProps: Object = {
     'data-block': true,
@@ -203,7 +203,7 @@ const getElementPropsConfig = (
 };
 
 class DraftEditorBlockNode extends React.Component<Props> {
-  wrapperRef: {current: null | Element} = React.createRef<Element>();
+  wrapperRef: {|current: null | Element|} = React.createRef<Element>();
 
   shouldComponentUpdate(nextProps: Props): boolean {
     const {block, direction, tree} = this.props;

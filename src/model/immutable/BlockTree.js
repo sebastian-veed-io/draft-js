@@ -22,7 +22,7 @@ const Immutable = require('immutable');
 
 const {List, Repeat, Record} = Immutable;
 
-const returnTrue = function () {
+const returnTrue = function() {
   return true;
 };
 
@@ -41,7 +41,6 @@ export type DecoratorRangeRawType = {
   start: ?number,
   end: ?number,
   decoratorKey: ?string,
-  // $FlowFixMe[value-as-type]
   leaves: ?Array<LeafRange>,
   ...
 };
@@ -50,7 +49,6 @@ type DecoratorRangeType = {
   start: ?number,
   end: ?number,
   decoratorKey: ?string,
-  // $FlowFixMe[value-as-type]
   leaves: ?List<LeafRange>,
   ...
 };
@@ -72,7 +70,6 @@ const BlockTree = {
     contentState: ContentState,
     block: BlockNodeRecord,
     decorator: ?DraftDecoratorType,
-    // $FlowFixMe[value-as-type]
   ): List<DecoratorRange> {
     const textLength = block.getLength();
     if (!textLength) {
@@ -107,7 +104,6 @@ const BlockTree = {
     return List(leafSets);
   },
 
-  // $FlowFixMe[value-as-type]
   fromJS({leaves, ...other}: DecoratorRangeRawType): DecoratorRange {
     return new DecoratorRange({
       ...other,
@@ -127,7 +123,6 @@ const BlockTree = {
 function generateLeaves(
   characters: List<CharacterMetadata>,
   offset: number,
-  // $FlowFixMe[value-as-type]
 ): List<LeafRange> {
   const leaves = [];
   const inlineStyles = characters.map(c => c.getStyle()).toList();

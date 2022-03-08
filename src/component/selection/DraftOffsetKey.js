@@ -16,11 +16,15 @@ import type {DraftOffsetKeyPath} from 'DraftOffsetKeyPath';
 const KEY_DELIMITER = '-';
 
 const DraftOffsetKey = {
-  encode(blockKey: string, decoratorKey: number, leafKey: number): string {
+  encode: function(
+    blockKey: string,
+    decoratorKey: number,
+    leafKey: number,
+  ): string {
     return blockKey + KEY_DELIMITER + decoratorKey + KEY_DELIMITER + leafKey;
   },
 
-  decode(offsetKey: string): DraftOffsetKeyPath {
+  decode: function(offsetKey: string): DraftOffsetKeyPath {
     // Extracts the last two parts of offsetKey and captures the rest in blockKeyParts
     const [leafKey, decoratorKey, ...blockKeyParts] = offsetKey
       .split(KEY_DELIMITER)

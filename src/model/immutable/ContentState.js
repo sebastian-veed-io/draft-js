@@ -18,7 +18,7 @@ import type {ContentStateRawType} from 'ContentStateRawType';
 import type DraftEntityInstance from 'DraftEntityInstance';
 import type {DraftEntityMutability} from 'DraftEntityMutability';
 import type {DraftEntityType} from 'DraftEntityType';
-import type {EntityMap} from 'EntityMap';
+import type {Map} from 'immutable';
 
 const BlockMapBuilder = require('BlockMapBuilder');
 const CharacterMetadata = require('CharacterMetadata');
@@ -50,20 +50,7 @@ const defaultRecord: ContentStateRecordType = {
   selectionAfter: null,
 };
 
-// Immutable 3 typedefs are not good, so ContentState ends up
-// subclassing `any`. Define a rudimentary type for the
-// supercalss here instead.
-declare class ContentStateRecordHelper {
-  constructor(args: any): ContentState;
-  merge(args: any): any;
-  setIn(keyPath: Array<string>, value: any): ContentState;
-  equals(other: ContentState): boolean;
-  mergeDeep(other: any): ContentState;
-}
-
-const ContentStateRecord: typeof ContentStateRecordHelper = (Record(
-  defaultRecord,
-): any);
+const ContentStateRecord = (Record(defaultRecord): any);
 
 /* $FlowFixMe[signature-verification-failure] Supressing a `signature-
  * verification-failure` error here. TODO: T65949050 Clean up the branch for
@@ -73,21 +60,21 @@ const ContentBlockNodeRecord = gkx('draft_tree_data_support')
   : ContentBlock;
 
 class ContentState extends ContentStateRecord {
-  getEntityMap(): EntityMap {
+  getEntityMap(): any {
     // TODO: update this when we fully remove DraftEntity
     return DraftEntity;
   }
 
   getBlockMap(): BlockMap {
-    return (this: any).get('blockMap');
+    return this.get('blockMap');
   }
 
   getSelectionBefore(): SelectionState {
-    return (this: any).get('selectionBefore');
+    return this.get('selectionBefore');
   }
 
   getSelectionAfter(): SelectionState {
-    return (this: any).get('selectionAfter');
+    return this.get('selectionAfter');
   }
 
   getBlockForKey(key: string): BlockNodeRecord {
@@ -182,11 +169,9 @@ class ContentState extends ContentStateRecord {
 
   replaceEntityData(
     key: string,
-    newData: interface {[key: string]: any},
+    newData: {[key: string]: any, ...},
   ): ContentState {
     // TODO: update this when we fully remove DraftEntity
-    /* $FlowFixMe[class-object-subtyping] added when improving typing for this
-     * parameters */
     DraftEntity.__replaceData(key, newData);
     return this;
   }
@@ -202,40 +187,12 @@ class ContentState extends ContentStateRecord {
     return DraftEntity.__get(key);
   }
 
-  getAllEntities(): OrderedMap<string, DraftEntityInstance> {
+  getAllEntities(): Map<string, DraftEntityInstance> {
     return DraftEntity.__getAll();
   }
 
-  setEntityMap(
-    entityMap: OrderedMap<string, DraftEntityInstance>,
-  ): ContentState {
-    DraftEntity.__loadWithEntities(entityMap);
-    return this;
-  }
-
-  static mergeEntityMaps(
-    to: OrderedMap<string, DraftEntityInstance>,
-    from: EntityMap,
-  ): OrderedMap<string, DraftEntityInstance> {
-    return to.merge(from.__getAll());
-  }
-
-  // TODO: when EntityMap is moved into content state this and `setEntityMap`
-  // Will be the exact same. Merge them then.
-  replaceEntityMap(entityMap: EntityMap): ContentState {
-    return this.setEntityMap(entityMap.__getAll());
-  }
-
-  setSelectionBefore(selection: SelectionState): ContentState {
-    return (this: any).set('selectionBefore', selection);
-  }
-
-  setSelectionAfter(selection: SelectionState): ContentState {
-    return (this: any).set('selectionAfter', selection);
-  }
-
-  setBlockMap(blockMap: BlockMap): ContentState {
-    return (this: any).set('blockMap', blockMap);
+  loadWithEntities(entities: Map<string, DraftEntityInstance>): void {
+    return DraftEntity.__loadWithEntities(entities);
   }
 
   static createFromBlockArray(
@@ -261,7 +218,7 @@ class ContentState extends ContentStateRecord {
 
   static createFromText(
     text: string,
-    delimiter?: string | RegExp = /\r\n?|\n/g,
+    delimiter: string | RegExp = /\r\n?|\n/g,
   ): ContentState {
     const strings = text.split(delimiter);
     const blocks = strings.map(block => {
@@ -280,7 +237,6 @@ class ContentState extends ContentStateRecord {
     return new ContentState({
       ...state,
       blockMap: OrderedMap(state.blockMap).map(
-        // $FlowFixMe[method-unbinding]
         ContentState.createContentBlockFromJS,
       ),
       selectionBefore: new SelectionState(state.selectionBefore),

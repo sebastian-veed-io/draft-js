@@ -5,11 +5,11 @@
  * LICENSE file in the root directory of this source tree.
  *
  * @format
- * @flow strict
+ * @flow
  * @emails oncall+draft_js
  */
 
-function getWindowForNode(node: ?Node): Window {
+function getWindowForNode(node: ?Node): any {
   if (!node || !node.ownerDocument || !node.ownerDocument.defaultView) {
     return window;
   }

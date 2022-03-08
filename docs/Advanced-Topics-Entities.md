@@ -67,7 +67,7 @@ const contentStateWithLink = Modifier.applyEntity(
   selectionState,
   entityKey,
 );
-const newEditorState = EditorState.set(editorState, {
+const newEditorState = EditorState.push(editorState, {
   currentContent: contentStateWithLink,
 });
 ```

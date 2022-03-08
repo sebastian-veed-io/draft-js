@@ -204,7 +204,6 @@ function testDecoratorFingerprint(
   const ev = getInputEvent(charToInsert);
   onBeforeInput(editor, ev);
 
-  // $FlowFixMe[method-unbinding] added when improving typing for this parameters
   expect(ev.preventDefault.mock.calls.length).toBe(shouldPrevent ? 1 : 0);
 }
 

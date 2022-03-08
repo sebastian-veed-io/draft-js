@@ -10,13 +10,11 @@
  */
 
 'use strict';
+
 import type {BlockNodeRecord} from 'BlockNodeRecord';
 import type ContentState from 'ContentState';
-import type {DraftEntityMutability} from 'DraftEntityMutability';
-import type {DraftEntityType} from 'DraftEntityType';
 import type {RawDraftContentBlock} from 'RawDraftContentBlock';
 import type {RawDraftContentState} from 'RawDraftContentState';
-import type {RawDraftEntity} from 'RawDraftEntity';
 
 const ContentBlock = require('ContentBlock');
 const ContentBlockNode = require('ContentBlockNode');
@@ -26,10 +24,7 @@ const encodeEntityRanges = require('encodeEntityRanges');
 const encodeInlineStyleRanges = require('encodeInlineStyleRanges');
 const invariant = require('invariant');
 
-const createRawBlock = (
-  block: BlockNodeRecord,
-  entityStorageMap: {[key: string]: RawDraftEntity},
-) => {
+const createRawBlock = (block: BlockNodeRecord, entityStorageMap: *) => {
   return {
     key: block.getKey(),
     text: block.getText(),
@@ -43,9 +38,9 @@ const createRawBlock = (
 
 const insertRawBlock = (
   block: BlockNodeRecord,
-  entityMap: {[key: string]: RawDraftEntity},
+  entityMap: *,
   rawBlocks: Array<RawDraftContentBlock>,
-  blockCacheRef: {...},
+  blockCacheRef: *,
 ) => {
   if (block instanceof ContentBlock) {
     rawBlocks.push(createRawBlock(block, entityMap));
@@ -77,7 +72,7 @@ const encodeRawBlocks = (
   const rawBlocks = [];
 
   const blockCacheRef = {};
-  const entityCacheRef: {[string]: ?string} = {};
+  const entityCacheRef = {};
   let entityStorageKey = 0;
 
   contentState.getBlockMap().forEach(block => {
@@ -119,13 +114,7 @@ const encodeRawEntityMap = (
 ): RawDraftContentState => {
   const {blocks, entityMap} = rawState;
 
-  const rawEntityMap: {
-    [number]: {
-      data: any,
-      mutability: DraftEntityMutability,
-      type: DraftEntityType,
-    },
-  } = {};
+  const rawEntityMap = {};
 
   Object.keys(entityMap).forEach((key, index) => {
     const entity = contentState.getEntity(DraftStringKey.unstringify(key));
@@ -138,8 +127,6 @@ const encodeRawEntityMap = (
 
   return {
     blocks,
-    // $FlowFixMe[incompatible-exact]
-    // $FlowFixMe[incompatible-return]
     entityMap: rawEntityMap,
   };
 };

@@ -163,15 +163,18 @@ const NestedRichTextEditorUtil: RichTextUtils = {
     // }
 
     // If that doesn't succeed, try to remove the current block style.
-    const withoutBlockStyle =
-      NestedRichTextEditorUtil.tryToRemoveBlockStyle(editorState);
+    const withoutBlockStyle = NestedRichTextEditorUtil.tryToRemoveBlockStyle(
+      editorState,
+    );
 
     if (withoutBlockStyle) {
       return EditorState.push(
         editorState,
         withoutBlockStyle,
-        withoutBlockStyle.getBlockMap().get(currentBlock.getKey()).getType() ===
-          'unstyled'
+        withoutBlockStyle
+          .getBlockMap()
+          .get(currentBlock.getKey())
+          .getType() === 'unstyled'
           ? 'change-block-type'
           : 'adjust-depth',
       );
@@ -201,10 +204,12 @@ const NestedRichTextEditorUtil: RichTextUtils = {
     const isSelectionCollapsed = selection.isCollapsed();
     const isMultiBlockSelection =
       selection.getAnchorKey() !== selection.getFocusKey();
-    const isUnsupportedNestingBlockType =
-      NESTING_DISABLED_TYPES.includes(blockType);
-    const isCurrentBlockOfUnsupportedNestingBlockType =
-      NESTING_DISABLED_TYPES.includes(currentBlock.getType());
+    const isUnsupportedNestingBlockType = NESTING_DISABLED_TYPES.includes(
+      blockType,
+    );
+    const isCurrentBlockOfUnsupportedNestingBlockType = NESTING_DISABLED_TYPES.includes(
+      currentBlock.getType(),
+    );
 
     // we don't allow this operations to avoid corrupting the document data model
     // to make sure that non nested blockTypes wont inherit children
@@ -246,7 +251,7 @@ const NestedRichTextEditorUtil: RichTextUtils = {
       .slice(selection.getStartOffset(), selection.getEndOffset())
       .some(v => {
         const entity = v.getEntity();
-        return !!entity && contentState.getEntity(entity).getType() === 'LINK';
+        return !!entity && entityMap.__get(entity).getType() === 'LINK';
       });
   },
 
@@ -286,6 +291,7 @@ const NestedRichTextEditorUtil: RichTextUtils = {
   onTab: (
     event: SyntheticKeyboardEvent<>,
     editorState: EditorState,
+    maxDepth: number,
   ): EditorState => {
     const selection = editorState.getSelection();
     const key = selection.getAnchorKey();
@@ -301,6 +307,11 @@ const NestedRichTextEditorUtil: RichTextUtils = {
     }
 
     event.preventDefault();
+
+    const depth = block.getDepth();
+    if (!event.shiftKey && depth === maxDepth) {
+      return editorState;
+    }
 
     // implement nested tree behaviour for onTab
     let blockMap = editorState.getCurrentContent().getBlockMap();
@@ -349,13 +360,14 @@ const NestedRichTextEditorUtil: RichTextUtils = {
       blockMap = onUntab(blockMap, block);
     }
     content = editorState.getCurrentContent().merge({
-      blockMap,
+      blockMap: blockMap,
     });
 
     const withAdjustment = adjustBlockDepthForContentState(
       content,
       selection,
       event.shiftKey ? -1 : 1,
+      maxDepth,
     );
 
     return EditorState.push(editorState, withAdjustment, 'adjust-depth');

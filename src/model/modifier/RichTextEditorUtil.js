@@ -25,20 +25,21 @@ const adjustBlockDepthForContentState = require('adjustBlockDepthForContentState
 const nullthrows = require('nullthrows');
 
 const RichTextEditorUtil: RichTextUtils = {
-  currentBlockContainsLink(editorState: EditorState): boolean {
+  currentBlockContainsLink: function(editorState: EditorState): boolean {
     const selection = editorState.getSelection();
     const contentState = editorState.getCurrentContent();
+    const entityMap = contentState.getEntityMap();
     return contentState
       .getBlockForKey(selection.getAnchorKey())
       .getCharacterList()
       .slice(selection.getStartOffset(), selection.getEndOffset())
       .some(v => {
         const entity = v.getEntity();
-        return !!entity && contentState.getEntity(entity).getType() === 'LINK';
+        return !!entity && entityMap.__get(entity).getType() === 'LINK';
       });
   },
 
-  getCurrentBlockType(editorState: EditorState): DraftBlockType {
+  getCurrentBlockType: function(editorState: EditorState): DraftBlockType {
     const selection = editorState.getSelection();
     return editorState
       .getCurrentContent()
@@ -46,11 +47,11 @@ const RichTextEditorUtil: RichTextUtils = {
       .getType();
   },
 
-  getDataObjectForLinkURL(uri: URI): DataObjectForLink {
+  getDataObjectForLinkURL: function(uri: URI): DataObjectForLink {
     return {url: uri.toString()};
   },
 
-  handleKeyCommand(
+  handleKeyCommand: function(
     editorState: EditorState,
     command: DraftEditorCommand | string,
     eventTimeStamp: ?number,
@@ -62,11 +63,6 @@ const RichTextEditorUtil: RichTextUtils = {
         return RichTextEditorUtil.toggleInlineStyle(editorState, 'ITALIC');
       case 'underline':
         return RichTextEditorUtil.toggleInlineStyle(editorState, 'UNDERLINE');
-      case 'strikethrough':
-        return RichTextEditorUtil.toggleInlineStyle(
-          editorState,
-          'STRIKETHROUGH',
-        );
       case 'code':
         return RichTextEditorUtil.toggleCode(editorState);
       case 'backspace':
@@ -83,7 +79,7 @@ const RichTextEditorUtil: RichTextUtils = {
     }
   },
 
-  insertSoftNewline(editorState: EditorState): EditorState {
+  insertSoftNewline: function(editorState: EditorState): EditorState {
     const contentState = DraftModifier.insertText(
       editorState.getCurrentContent(),
       editorState.getSelection(),
@@ -108,7 +104,7 @@ const RichTextEditorUtil: RichTextUtils = {
    * For collapsed selections at the start of styled blocks, backspace should
    * just remove the existing style.
    */
-  onBackspace(editorState: EditorState): ?EditorState {
+  onBackspace: function(editorState: EditorState): ?EditorState {
     const selection = editorState.getSelection();
     if (
       !selection.isCollapsed() ||
@@ -139,8 +135,9 @@ const RichTextEditorUtil: RichTextUtils = {
     }
 
     // If that doesn't succeed, try to remove the current block style.
-    const withoutBlockStyle =
-      RichTextEditorUtil.tryToRemoveBlockStyle(editorState);
+    const withoutBlockStyle = RichTextEditorUtil.tryToRemoveBlockStyle(
+      editorState,
+    );
 
     if (withoutBlockStyle) {
       return EditorState.push(
@@ -153,7 +150,7 @@ const RichTextEditorUtil: RichTextUtils = {
     return null;
   },
 
-  onDelete(editorState: EditorState): ?EditorState {
+  onDelete: function(editorState: EditorState): ?EditorState {
     const selection = editorState.getSelection();
     if (!selection.isCollapsed()) {
       return null;
@@ -193,12 +190,16 @@ const RichTextEditorUtil: RichTextUtils = {
     return null;
   },
 
-  onTab(
+  onTab: function(
     event: SyntheticKeyboardEvent<>,
     editorState: EditorState,
+    maxDepth: number,
   ): EditorState {
     const selection = editorState.getSelection();
     const key = selection.getAnchorKey();
+    if (key !== selection.getFocusKey()) {
+      return editorState;
+    }
 
     const content = editorState.getCurrentContent();
     const block = content.getBlockForKey(key);
@@ -209,16 +210,22 @@ const RichTextEditorUtil: RichTextUtils = {
 
     event.preventDefault();
 
+    const depth = block.getDepth();
+    if (!event.shiftKey && depth === maxDepth) {
+      return editorState;
+    }
+
     const withAdjustment = adjustBlockDepthForContentState(
       content,
       selection,
       event.shiftKey ? -1 : 1,
+      maxDepth,
     );
 
     return EditorState.push(editorState, withAdjustment, 'adjust-depth');
   },
 
-  toggleBlockType(
+  toggleBlockType: function(
     editorState: EditorState,
     blockType: DraftBlockType,
   ): EditorState {
@@ -267,7 +274,7 @@ const RichTextEditorUtil: RichTextUtils = {
     );
   },
 
-  toggleCode(editorState: EditorState): EditorState {
+  toggleCode: function(editorState: EditorState): EditorState {
     const selection = editorState.getSelection();
     const anchorKey = selection.getAnchorKey();
     const focusKey = selection.getFocusKey();
@@ -285,7 +292,7 @@ const RichTextEditorUtil: RichTextUtils = {
    * internal state. If it is not collapsed, apply the change directly
    * to the document state.
    */
-  toggleInlineStyle(
+  toggleInlineStyle: function(
     editorState: EditorState,
     inlineStyle: string,
   ): EditorState {
@@ -328,7 +335,7 @@ const RichTextEditorUtil: RichTextUtils = {
     return EditorState.push(editorState, newContent, 'change-inline-style');
   },
 
-  toggleLink(
+  toggleLink: function(
     editorState: EditorState,
     targetSelection: SelectionState,
     entityKey: ?string,
@@ -346,7 +353,7 @@ const RichTextEditorUtil: RichTextUtils = {
    * When a collapsed cursor is at the start of a styled block, changes block
    * type to 'unstyled'. Returns null if selection does not meet that criteria.
    */
-  tryToRemoveBlockStyle(editorState: EditorState): ?ContentState {
+  tryToRemoveBlockStyle: function(editorState: EditorState): ?ContentState {
     const selection = editorState.getSelection();
     const offset = selection.getAnchorOffset();
     if (selection.isCollapsed() && offset === 0) {

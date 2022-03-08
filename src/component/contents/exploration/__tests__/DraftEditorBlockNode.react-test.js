@@ -23,6 +23,7 @@ const ContentState = require('ContentState');
 const DefaultDraftBlockRenderMap = require('DefaultDraftBlockRenderMap');
 const DraftEditorBlockNode = require('DraftEditorBlockNode.react');
 const EditorState = require('EditorState');
+const React = require('React');
 const SelectionState = require('SelectionState');
 const Style = require('Style');
 const UnicodeBidiDirection = require('UnicodeBidiDirection');
@@ -32,7 +33,6 @@ const getElementPosition = require('getElementPosition');
 const getScrollPosition = require('getScrollPosition');
 const getViewportDimensions = require('getViewportDimensions');
 const Immutable = require('immutable');
-const React = require('react');
 const ReactTestRenderer = require('react-test-renderer');
 
 const {List} = Immutable;

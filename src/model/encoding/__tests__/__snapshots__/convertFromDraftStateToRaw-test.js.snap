@@ -79,8 +79,12 @@ Object {
   "entityMap": Object {
     "0": Object {
       "data": Object {},
-      "mutability": "IMMUTABLE",
-      "type": "IMAGE",
+      "mutability": undefined,
+      "type": Object {
+        "data": null,
+        "mutability": "IMMUTABLE",
+        "type": "IMAGE",
+      },
     },
   },
 }

@@ -21,7 +21,7 @@ const CharacterMetadata = require('CharacterMetadata');
 const ContentBlock = require('ContentBlock');
 const ContentState = require('ContentState');
 const DraftEditorBlock = require('DraftEditorBlock.react');
-const DraftEditorLeaf = require('DraftEditorLeaf.react');
+const React = require('React');
 const ReactDOM = require('ReactDOM');
 const SampleDraftInlineStyle = require('SampleDraftInlineStyle');
 const SelectionState = require('SelectionState');
@@ -32,16 +32,18 @@ const getElementPosition = require('getElementPosition');
 const getScrollPosition = require('getScrollPosition');
 const getViewportDimensions = require('getViewportDimensions');
 const Immutable = require('immutable');
-const React = require('react');
 const ReactTestRenderer = require('react-test-renderer');
 
 const {BOLD, NONE, ITALIC} = SampleDraftInlineStyle;
+
 const mockGetDecorations = jest.fn();
+
 class DecoratorSpan extends React.Component {
   render() {
     return <span>{this.props.children}</span>;
   }
 }
+
 // Define a class to satisfy typechecks.
 class Decorator {
   getDecorations() {
@@ -54,6 +56,7 @@ class Decorator {
     return {};
   }
 }
+
 const mockLeafRender = jest.fn(() => <span />);
 class MockEditorLeaf extends React.Component {
   render() {
@@ -71,6 +74,8 @@ getElementPosition.mockReturnValue({
 });
 getScrollPosition.mockReturnValue({x: 0, y: 0});
 getViewportDimensions.mockReturnValue({width: 1200, height: 800});
+
+const DraftEditorLeaf = require('DraftEditorLeaf.react');
 
 const returnEmptyString = () => {
   return '';
@@ -168,7 +173,6 @@ test('must render multiple leaf nodes', () => {
 
   assertLeaves(blockInstance.children[0].children, [
     {
-      /* eslint-disable-next-line fb-www/gender-neutral-language */
       text: 'he',
       offsetKey: 'a-0-0',
       start: 0,

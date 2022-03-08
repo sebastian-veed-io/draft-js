@@ -12,11 +12,11 @@
 'use strict';
 
 const DraftStringKey = {
-  stringify(key: ?string): string {
+  stringify: function(key: ?string): string {
     return '_' + String(key);
   },
 
-  unstringify(key: string): string {
+  unstringify: function(key: string): string {
     return key.slice(1);
   },
 };

@@ -21,14 +21,13 @@ import type {BidiDirection} from 'UnicodeBidiDirection';
 import type {Set} from 'immutable';
 
 const DraftOffsetKey = require('DraftOffsetKey');
+const React = require('React');
 const UnicodeBidi = require('UnicodeBidi');
 const UnicodeBidiDirection = require('UnicodeBidiDirection');
 
-const React = require('react');
-
 type Props = {
   block: BlockNodeRecord,
-  children: ?$ReadOnlyArray<React.Node>,
+  children: ?Array<React.Node>,
   contentState: ContentState,
   decorator: DraftDecoratorType,
   decoratorKey: string,

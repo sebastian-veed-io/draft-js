@@ -13,6 +13,7 @@
 
 import type {BlockNodeRecord} from 'BlockNodeRecord';
 import type ContentState from 'ContentState';
+import type {EntityMap} from 'EntityMap';
 import type SelectionState from 'SelectionState';
 import type {List} from 'immutable';
 
@@ -26,13 +27,14 @@ function removeEntitiesAtEdges(
   selectionState: SelectionState,
 ): ContentState {
   const blockMap = contentState.getBlockMap();
+  const entityMap = contentState.getEntityMap();
 
-  const updatedBlocks: {[string]: BlockNodeRecord} = {};
+  const updatedBlocks = {};
 
   const startKey = selectionState.getStartKey();
   const startOffset = selectionState.getStartOffset();
   const startBlock = blockMap.get(startKey);
-  const updatedStart = removeForBlock(contentState, startBlock, startOffset);
+  const updatedStart = removeForBlock(entityMap, startBlock, startOffset);
 
   if (updatedStart !== startBlock) {
     updatedBlocks[startKey] = updatedStart;
@@ -45,14 +47,14 @@ function removeEntitiesAtEdges(
     endBlock = updatedStart;
   }
 
-  const updatedEnd = removeForBlock(contentState, endBlock, endOffset);
+  const updatedEnd = removeForBlock(entityMap, endBlock, endOffset);
 
   if (updatedEnd !== endBlock) {
     updatedBlocks[endKey] = updatedEnd;
   }
 
   if (!Object.keys(updatedBlocks).length) {
-    return contentState.setSelectionAfter(selectionState);
+    return contentState.set('selectionAfter', selectionState);
   }
 
   return contentState.merge({
@@ -104,7 +106,7 @@ function getRemovalRange(
 }
 
 function removeForBlock(
-  contentState: ContentState,
+  entityMap: EntityMap,
   block: BlockNodeRecord,
   offset: number,
 ): BlockNodeRecord {
@@ -115,7 +117,7 @@ function removeForBlock(
   const entityAfterCursor = charAfter ? charAfter.getEntity() : undefined;
 
   if (entityAfterCursor && entityAfterCursor === entityBeforeCursor) {
-    const entity = contentState.getEntity(entityAfterCursor);
+    const entity = entityMap.__get(entityAfterCursor);
     if (entity.getMutability() !== 'MUTABLE') {
       let {start, end} = getRemovalRange(chars, entityAfterCursor, offset);
       let current;

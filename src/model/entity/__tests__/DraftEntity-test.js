@@ -11,54 +11,46 @@
 
 'use strict';
 
-const ContentState = require('ContentState');
+const DraftEntity = require('DraftEntity');
 
 beforeEach(() => {
   jest.resetModules();
 });
 
-const createLink = (contentState: ContentState) => {
-  const newContentState = contentState.createEntity('LINK', 'MUTABLE', {
-    uri: 'zombo.com',
-  });
-  return {
-    contentState: newContentState,
-    key: contentState.getLastCreatedEntityKey(),
-  };
+const createLink = () => {
+  return DraftEntity.__create('LINK', 'MUTABLE', {uri: 'zombo.com'});
 };
 
 test('must create instances', () => {
-  const {key} = createLink(ContentState.createFromText(''));
+  const key = createLink();
   expect(typeof key).toMatchSnapshot();
 });
 
 test('must retrieve an instance given a key', () => {
-  const {key, contentState} = createLink(ContentState.createFromText(''));
-  const retrieved = contentState.getEntity(key);
+  const key = createLink();
+  const retrieved = DraftEntity.__get(key);
   expect(retrieved.getType()).toMatchSnapshot();
   expect(retrieved.getMutability()).toMatchSnapshot();
   expect(retrieved.getData()).toMatchSnapshot();
 });
 
 test('must throw when retrieving for an invalid key', () => {
-  const {contentState} = createLink(ContentState.createFromText(''));
-  expect(() => contentState.getEntity('asdfzxcvqweriuop')).toThrow();
+  createLink();
+  expect(() => DraftEntity.__get('asdfzxcvqweriuop')).toThrow();
 });
 
 test('must merge data', () => {
-  const result = createLink(ContentState.createFromText(''));
-  const key = result.key;
-  let contentState = result.contentState;
+  const key = createLink();
 
   // Merge new property.
   const newData = {foo: 'bar'};
-  contentState = contentState.mergeEntityData(key, newData);
-  const newEntity = contentState.getEntity(key);
+  DraftEntity.__mergeData(key, newData);
+  const newEntity = DraftEntity.__get(key);
 
   // Replace existing property.
   const withNewURI = {uri: 'homestarrunner.com'};
-  contentState = contentState.mergeEntityData(key, withNewURI);
-  const entityWithNewURI = contentState.getEntity(key);
+  DraftEntity.__mergeData(key, withNewURI);
+  const entityWithNewURI = DraftEntity.__get(key);
 
   expect(newEntity.getData()).toMatchSnapshot();
   expect(entityWithNewURI.getData()).toMatchSnapshot();

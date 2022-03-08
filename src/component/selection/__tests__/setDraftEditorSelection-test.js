@@ -12,9 +12,9 @@
 
 jest.disableAutomock();
 
+const addFocusToSelection = require('setDraftEditorSelection')
+  .addFocusToSelection;
 const getSampleSelectionMocksForTesting = require('getSampleSelectionMocksForTesting');
-const addFocusToSelection =
-  require('setDraftEditorSelection').addFocusToSelection;
 
 // Based on https://w3c.github.io/selection-api/#selection-interface
 class Selection {
