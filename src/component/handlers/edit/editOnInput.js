@@ -110,7 +110,11 @@ function editOnInput(editor: DraftEditor, event: ?SyntheticInputEvent<>): void {
 
   let domText = anchorNode.textContent;
   const editorState = editor._latestEditorState;
-  const offsetKey = nullthrows(findAncestorOffsetKey(anchorNode));
+  const offsetKey = findAncestorOffsetKey(anchorNode);
+  if (offsetKey === null) {
+    console.error('VEED override editOnInput:  ancesorOffsetKey is null');
+    return;
+  }
   const {blockKey, decoratorKey, leafKey} = DraftOffsetKey.decode(offsetKey);
 
   const {start, end} = editorState
